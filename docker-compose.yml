@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  chibi:
+    build:
+      context: .
+    volumes:
+      - ./examples/etc/app/config.toml:/etc/chibi/config.toml
+    init: true
+    command: >
+      --config.file /etc/chibi/config.toml
+    env_file:
+      - .env
+  rabbitmq:
+    image: rabbitmq:3

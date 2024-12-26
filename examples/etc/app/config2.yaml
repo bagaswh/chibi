@@ -1,0 +1,54 @@
+log_level: debug
+
+logging:
+  level: debug
+
+event_stores:
+  - name: rabbitmq_1
+    type: rabbitmq
+    rabbitmq:
+      hostname: localhost
+      port: 5672
+
+hooks:
+  startup:
+    actions:
+      - type: event_store_publish
+        params:
+          to: rabbitmq_1
+          params:
+            exchange:
+              name: ${ENV:VMSS_NAME}.new-vm-start
+              assert: true
+              type: fanout
+            payload: |
+              {"newHostname":"${ENV:HOSTNAME}"}
+
+subscribers:
+  - from: rabbitmq_1
+    debounce: 2s
+    payload:
+      parse_as: json
+    params:
+      queue:
+        exclusive: true
+        bind_to_exchange: ${ENV:VMSS_NAME}.new-vm-start
+      exchange:
+        name: ${ENV:VMSS_NAME}.new-vm-start
+        assert: true
+        type: fanout
+    actions:
+      - type: shell
+        params:
+          script: |
+            new_hostname=$(echo $__CHIBI_PAYLOAD | jq '.json.newHostname')
+            cat <<EOL | tee -a /tmp/chibi_scale_out.log
+            [$(date)] new host: $__CHIBI_PAYLOAD
+            [$(date)] about to do some funny thing rn
+
+            EOL
+        condition: |
+          __CHIBI_HOSTNAME != __CHIBI_PAYLOAD.json.newHostname
+
+vars:
+  vmss_name: ${ENV:VMSS_NAME}

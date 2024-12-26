@@ -1,0 +1,36 @@
+{
+  "name": "chibi",
+  "version": "0.0.1",
+  "description": "Event publisher and subscriber",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "build:start": "tsc && node dist/index.js",
+    "build:start-dev": "ts-node src/index.ts",
+    "tsc:init": "tsc --init"
+  },
+  "keywords": [],
+  "author": "Bagas Wahyu Hidayah <bagaswh00@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.10.3",
+    "commander": "^10.0.0",
+    "dotenv": "^16.0.3",
+    "expression-eval": "^5.0.0",
+    "js-yaml": "^4.1.0",
+    "ms": "^2.1.3",
+    "nanoid": "^3.3.0",
+    "source-map-support": "^0.5.21",
+    "winston": "^3.9.0",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@types/amqplib": "^0.10.1",
+    "@types/js-yaml": "^4.0.5",
+    "@types/ms": "^0.7.31",
+    "@types/node": "^18.11.18",
+    "@types/source-map-support": "^0.5.6",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.9.4"
+  }
+}

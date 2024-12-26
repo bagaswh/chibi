@@ -1,0 +1,59 @@
+log_level: debug
+
+event_stores:
+  - name: rabbitmq_1
+    type: rabbitmq
+    rabbitmq:
+      hostname: localhost
+      port: 5672
+      username: burqa
+      password: ${ENV:RABBITMQ_PASSWORD}
+
+hooks:
+  startup:
+    actions:
+      - type: event_store_publish
+        params:
+          to: rabbitmq_1
+          params:
+            exchange:
+              name: vmss-application-prod-southeastasia.new-vm-start
+              assert: true
+              type: fanout
+            payload: |
+              {"newHostname":"new_instance_id"}
+
+      - type: shell
+        params:
+          script: |
+            echo 'i am alive ' $(date) > /tmp/test
+
+# purpose of `subscribers` is to listen from event stores
+subscribers:
+  - from: rabbitmq_1
+    payload:
+      parse_as: json
+    params:
+      queue:
+        exclusive: true
+        bind_to_exchange: vmss-application-prod-southeastasia.new-vm-start
+      exchange:
+        name: vmss-application-prod-southeastasia.new-vm-start
+        assert: true
+        type: fanout
+    actions:
+      - type: shell
+        params:
+          script: |
+            curl "https://webhook.site/460e9efb-1fad-401e-9224-12ca809e436e"
+        condition: |
+          true
+
+vars:
+  vmss_name: vmss-application-prod-southeastasia
+
+metrics:
+  storage: prometheus
+
+web:
+  port: 8451
